@@ -10,8 +10,8 @@ const textureLoader = new THREE.TextureLoader();
 const floorTexture = textureLoader.load('/images/grid.png');
 floorTexture.wrapS = THREE.RepeatWrapping;
 floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.x = 10;
-floorTexture.repeat.y = 10;
+floorTexture.repeat.x = 100;
+floorTexture.repeat.y = 100;
 
 // Renderer
 const canvas = document.querySelector('#three-canvas');
@@ -69,7 +69,7 @@ scene.add(directionalLight);
 // Mesh
 const meshes = [];
 const floorMesh = new THREE.Mesh(
-	new THREE.PlaneGeometry(100, 100),
+	new THREE.PlaneGeometry(1000, 1000),
 	new THREE.MeshStandardMaterial({
 		map: floorTexture
 	})
@@ -169,13 +169,14 @@ function draw() {
 			camera.position.x = cameraPosition.x + player.modelMesh.position.x;
 			camera.position.z = cameraPosition.z + player.modelMesh.position.z;
 			
+
 			// player.actions[0].stop();
 			player.actions[1].play();
 			
 			
-			if (  // 목표 지점과 현재 지점이 0.03 보다 작으면
-				Math.abs(destinationPoint.x - player.modelMesh.position.x) < 0.03 &&    
-				Math.abs(destinationPoint.z - player.modelMesh.position.z) < 0.03
+			if (  // 목표 지점과 현재 지점이 0.1 보다 작으면
+				Math.abs(destinationPoint.x - player.modelMesh.position.x) < 0.1 &&    
+				Math.abs(destinationPoint.z - player.modelMesh.position.z) < 0.1
 			) {   // 멈춤 상태
 				player.moving = false;
 				console.log('멈춤');
@@ -228,6 +229,7 @@ function draw() {
 				);
 			}
 		} else {
+			player.moving = false;
 			// 서 있는 상태
 			player.actions[1].stop(); // 걸어가는 상태 멈춤
 			// player.actions[0].play();
@@ -236,7 +238,10 @@ function draw() {
 
 	renderer.render(scene, camera);
 	renderer.setAnimationLoop(draw);
+	// console.log(camera.position)
+
 }
+
 // 좌표 얻어내는 함수
 function checkIntersects() {
 	// raycaster.setFromCamera(mouse, camera);
@@ -250,12 +255,11 @@ function checkIntersects() {
 			player.modelMesh.lookAt(destinationPoint);  // 광선이 맞은 포인트 위치를 바라봄
             player.modelMesh.rotation.y += Math.PI; // 180도 회전 추가 (필요하면 조정)
 
-			// console.log(item.point)
-
 			player.moving = true;
 
 			pointerMesh.position.x = destinationPoint.x;
 			pointerMesh.position.z = destinationPoint.z;
+
 		}
 		break;
 	}
