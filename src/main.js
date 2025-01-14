@@ -1,17 +1,21 @@
 import * as THREE from 'three';
+// import * as BufferGeometryUtils from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Stuff } from './Stuff';
 import { Player } from './Player';
 import { House } from './House';
+import { Table } from './Table';
 import gsap from 'gsap';
+import { GUI } from 'dat.gui'
+
 
 // Texture - 바닥
 const textureLoader = new THREE.TextureLoader();
 const floorTexture = textureLoader.load('/images/grid.png');
 floorTexture.wrapS = THREE.RepeatWrapping;
 floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.x = 100;
-floorTexture.repeat.y = 100;
+floorTexture.repeat.x = 50;
+floorTexture.repeat.y = 50;
 
 // Renderer
 const canvas = document.querySelector('#three-canvas');
@@ -27,6 +31,12 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 그림자 부드럽게
 // Scene
 const scene = new THREE.Scene();
 
+// AxesHelper
+const axesHelper = new THREE.AxesHelper(100); // 축 크기
+axesHelper.position.y = 3
+scene.add(axesHelper);
+
+
 // Camera
 const camera = new THREE.OrthographicCamera(  // 직교 카메라 - 객체들이 어디있든지 동일하게 보여주는 카메라. 원근 x
 	-(window.innerWidth / window.innerHeight), // left
@@ -37,11 +47,21 @@ const camera = new THREE.OrthographicCamera(  // 직교 카메라 - 객체들이
 	1000
 );
 
-const cameraPosition = new THREE.Vector3(1, 5, 5); // 카메라 위치
+const cameraPosition = new THREE.Vector3(2, 6, 5); // 카메라 위치
 camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-camera.zoom = 0.07; // OrthographicCamera는 줌 설정 가능
+camera.zoom = 0.045; // OrthographicCamera는 줌 설정 가능
 camera.updateProjectionMatrix();
 scene.add(camera);
+
+// GUI
+const gui = new GUI();
+const cameraFolder = gui.addFolder('Camera');
+cameraFolder.add(camera, 'zoom', 0.01, 0.1, 0.001) // 줌 범위 설정 (최소값, 최대값, 스텝)
+	.name('Zoom')
+	.onChange(() => {
+		camera.updateProjectionMatrix(); // 줌 변경 후 업데이트 필요
+	});
+cameraFolder.open();
 
 // Light
 const ambientLight = new THREE.AmbientLight('white', 2.5);
@@ -66,6 +86,9 @@ directionalLight.shadow.camera.near = -100;
 directionalLight.shadow.camera.far = 100;
 scene.add(directionalLight);
 
+// Controls
+// const controls = new OrbitControls(camera, renderer.domElement);
+
 // Mesh
 const meshes = [];
 const floorMesh = new THREE.Mesh(
@@ -80,6 +103,7 @@ floorMesh.receiveShadow = true;
 scene.add(floorMesh);
 meshes.push(floorMesh);
 
+// 포인터 매쉬
 const pointerMesh = new THREE.Mesh(
 	new THREE.PlaneGeometry(1, 1),
 	new THREE.MeshBasicMaterial({
@@ -93,7 +117,8 @@ pointerMesh.position.y = 0.01;
 pointerMesh.receiveShadow = true;
 scene.add(pointerMesh);
 
-const spotMesh = new THREE.Mesh(
+// 하우스 스팟 메쉬
+const houseSpotMesh = new THREE.Mesh(
 	new THREE.PlaneGeometry(3, 3),
 	new THREE.MeshStandardMaterial({
 		color: 'yellow',
@@ -101,23 +126,134 @@ const spotMesh = new THREE.Mesh(
 		opacity: 0.5
 	})
 );
-spotMesh.position.set(5, 0.005, 5);
-spotMesh.rotation.x = -Math.PI/2;
-spotMesh.receiveShadow = true;
-scene.add(spotMesh);
+houseSpotMesh.position.set(50, 0.005, 5);
+houseSpotMesh.rotation.x = -Math.PI/2;
+houseSpotMesh.receiveShadow = true;
+scene.add(houseSpotMesh);
+
+
+
+// 테이블 스팟 메쉬
+const tableSpotMesh = new THREE.Mesh(
+	new THREE.PlaneGeometry(3, 3),
+	new THREE.MeshStandardMaterial({
+		color: 'skyblue',
+		transparent: true,
+		opacity: 0.5
+	})
+);
+tableSpotMesh.position.set(50, 0.005, 50);
+tableSpotMesh.rotation.x = -Math.PI/2;
+tableSpotMesh.receiveShadow = true;
+scene.add(tableSpotMesh);
 
 const gltfLoader = new GLTFLoader();
+
 
 // 하우스
 const house = new House({
 	gltfLoader,
 	scene,
 	modelSrc: '/models/isometric_room.glb',
-	x: 15,
+	x: 30,
 	y: -10.3,
 	z: 10,
-	rotationY: Math.PI
 });
+
+// ppt화면
+const pptTexture1 = new THREE.TextureLoader().load('./images/ppt1.png')
+const planeGeometry = new THREE.PlaneGeometry(9.6, 5.4)
+const material = new THREE.MeshStandardMaterial({
+	map: pptTexture1,
+});
+const ppt1 = new THREE.Mesh(planeGeometry, material);
+ppt1.position.set(35, 13, 47)
+scene.add(ppt1);
+
+// 감자 표정 말풍선
+// const emotionTexture1 = new THREE.TextureLoader().load('./images/gamza_emotion.png')
+// const emotionPlaneGeometry = new THREE.PlaneGeometry(3, 3)
+// const emotionMaterial = new THREE.MeshBasicMaterial({
+// 	map: emotionTexture1,
+// 	transparent: true, // PNG 투명도 활성화
+//     alphaTest: 0.5 // 투명도 기준치 설정 (0.5는 중간값, 필요에 따라 조정 가능)
+// });
+// const emotion1 = new THREE.Mesh(emotionPlaneGeometry, emotionMaterial);
+// emotion1.position.y = 7
+// scene.add(emotion1);
+
+const loader = new THREE.TextureLoader();
+let emotion1;
+loader.load('./images/gamza_emotion.png', (texture) => {
+    texture.colorSpace = THREE.SRGBColorSpace; // sRGB 색 공간 설정
+    texture.needsUpdate = true;
+
+    const emotionPlaneGeometry = new THREE.PlaneGeometry(3, 3);
+    const emotionMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true, // PNG의 투명도 반영
+        alphaTest: 0.5 // 알파 값 기준
+    });
+
+    emotion1 = new THREE.Mesh(emotionPlaneGeometry, emotionMaterial);
+    emotion1.position.y = 7; // 위치 설정
+    scene.add(emotion1);
+});
+
+
+	// // 지오메트리 합치기
+	// const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries([boxGeometry, sphereGeometry]);
+	// // 메쉬 생성
+	// const mesh = new THREE.Mesh(mergedGeometry, material);
+	// scene.add(mesh);
+
+// 책걸상
+const tables = []
+const table1 = new Table({
+	gltfLoader,
+	scene,
+	modelSrc: '/models/modern-table-and-chair-set.glb',
+	x: 30,
+	y: 1.5,
+	z: 50,
+	scaleX: 0,
+	scaleY: 0,
+	scaleZ: 0
+});
+const table2 = new Table({
+	gltfLoader,
+	scene,
+	modelSrc: '/models/modern-table-and-chair-set.glb',
+	x: 36,
+	y: 1.5,
+	z: 50,
+	scaleX: 0,
+	scaleY: 0,
+	scaleZ: 0
+});
+const table3 = new Table({
+	gltfLoader,
+	scene,
+	modelSrc: '/models/modern-table-and-chair-set.glb',
+	x: 30,
+	y: 1.5,
+	z: 60,
+	scaleX: 0,
+	scaleY: 0,
+	scaleZ: 0
+});
+const table4 = new Table({
+	gltfLoader,
+	scene,
+	modelSrc: '/models/modern-table-and-chair-set.glb',
+	x: 36,
+	y: 1.5,
+	z: 60,
+	scaleX: 0,
+	scaleY: 0,
+	scaleZ: 0
+});
+
 
 // 플레이어
 const player = new Player({
@@ -144,6 +280,7 @@ function draw() {
 
 	if (player.modelMesh) {
 		camera.lookAt(player.modelMesh.position);
+
 	}
 
 	if (player.modelMesh) {
@@ -162,8 +299,11 @@ function draw() {
 				destinationPoint.x - player.modelMesh.position.x
 			);
 			// 구한 각도를 이용해 좌표를 구하고 그 좌표로 이동
-			player.modelMesh.position.x += Math.cos(angle) * 0.1;
-			player.modelMesh.position.z += Math.sin(angle) * 0.1;
+			player.modelMesh.position.x += Math.cos(angle) * 0.2;  // 걷는 속도
+			player.modelMesh.position.z += Math.sin(angle) * 0.2;
+
+			emotion1.position.x += Math.cos(angle) * 0.2; 
+			emotion1.position.z += Math.sin(angle) * 0.2; 
 
 			// 카메라도 같이 이동
 			camera.position.x = cameraPosition.x + player.modelMesh.position.x;
@@ -182,14 +322,16 @@ function draw() {
 				console.log('멈춤');
 			}
 
+
+			// 하우스 인터랙션
 			if (   // 노란색 포인트 지점(3*3사각형) 안에 도달시 
-				Math.abs(spotMesh.position.x - player.modelMesh.position.x) < 1.5 &&
-				Math.abs(spotMesh.position.z - player.modelMesh.position.z) < 1.5
+				Math.abs(houseSpotMesh.position.x - player.modelMesh.position.x) < 1.5 &&
+				Math.abs(houseSpotMesh.position.z - player.modelMesh.position.z) < 1.5
 			) {    // house.visible = false 가 아닐 시
 				if (!house.visible) {
-					console.log('나와');
+					// console.log('나와');
 					house.visible = true;
-					spotMesh.material.color.set('seagreen');
+					houseSpotMesh.material.color.set('seagreen');
 					// house 매쉬 튀어 나옴
 					gsap.to(
 						house.modelMesh.position,
@@ -210,24 +352,100 @@ function draw() {
 				}
 				// house가 visible 상태라면
 			} else if (house.visible) {
-				console.log('들어가');
+				// console.log('들어가');
 				house.visible = false;
-				spotMesh.material.color.set('yellow');
-				gsap.to(
-					house.modelMesh.position,
-					{
-						duration: 0.5,
-						y: -10.3,
-					}
-				);
+				houseSpotMesh.material.color.set('yellow');
+				// gsap.to(
+				// 	house.modelMesh.position,
+				// 	{
+				// 		duration: 0.5,
+				// 		y: -10.3,
+				// 	}
+				// );
 				gsap.to(
 					camera.position,
 					{
 						duration: 1,
-						y: 5
+						y: 6
 					}
 				);
 			}
+
+			// 테이블 인터랙션
+			if (   // 파란색 포인트 지점(3*3사각형) 안에 도달시 
+			Math.abs(tableSpotMesh.position.x - player.modelMesh.position.x) < 1.5 &&
+			Math.abs(tableSpotMesh.position.z - player.modelMesh.position.z) < 1.5
+		) {    // house.visible = false 가 아닐 시
+			if (!table1.visible) {
+				// console.log('나타나');
+				table1.visible = true;
+				tableSpotMesh.material.color.set('seagreen');
+				// house 매쉬 튀어 나옴
+				gsap.to(
+					table1.modelMesh.scale,
+					{
+						duration: 1,
+						x: 3,
+						y: 4,
+						z: 3,
+						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+					}
+				);
+				gsap.to(
+					table2.modelMesh.scale,
+					{
+						duration: 1.2,
+						x: 3,
+						y: 4,
+						z: 3,
+						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+					}
+				);
+				gsap.to(
+					table3.modelMesh.scale,
+					{
+						duration: 1.3,
+						x: 3,
+						y: 4,
+						z: 3,
+						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+					}
+				);
+				gsap.to(
+					table4.modelMesh.scale,
+					{
+						duration: 1.4,
+						x: 3,
+						y: 4,
+						z: 3,
+						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+					}
+				);
+				// 카메라 각도 변환
+				gsap.to(
+					camera.position,
+					{
+						duration: 1,
+						y: 3
+					}
+				);
+			}
+		} else if (table1.visible) {
+			// table1.visible = false;
+			tableSpotMesh.material.color.set('skyblue');
+			
+			gsap.to(
+				camera.position,
+				{
+					duration: 1,
+					y: 6
+				}
+			);
+		}
+
+
+
+		
 		} else {
 			player.moving = false;
 			// 서 있는 상태
@@ -235,13 +453,9 @@ function draw() {
 			// player.actions[0].play();
 		}
 	}
-
 	renderer.render(scene, camera);
 	renderer.setAnimationLoop(draw);
-	// console.log(camera.position)
-
 }
-
 // 좌표 얻어내는 함수
 function checkIntersects() {
 	// raycaster.setFromCamera(mouse, camera);
@@ -259,11 +473,11 @@ function checkIntersects() {
 
 			pointerMesh.position.x = destinationPoint.x;
 			pointerMesh.position.z = destinationPoint.z;
-
 		}
 		break;
 	}
 }
+
 
 function setSize() {
 	camera.left = -(window.innerWidth / window.innerHeight);
