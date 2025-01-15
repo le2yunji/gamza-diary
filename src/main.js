@@ -132,7 +132,6 @@ houseSpotMesh.receiveShadow = true;
 scene.add(houseSpotMesh);
 
 
-
 // 테이블 스팟 메쉬
 const tableSpotMesh = new THREE.Mesh(
 	new THREE.PlaneGeometry(3, 3),
@@ -147,8 +146,24 @@ tableSpotMesh.rotation.x = -Math.PI/2;
 tableSpotMesh.receiveShadow = true;
 scene.add(tableSpotMesh);
 
-const gltfLoader = new GLTFLoader();
 
+// 발표 스팟 메쉬
+const presentSpotMesh = new THREE.Mesh(
+	new THREE.PlaneGeometry(2, 2),
+	new THREE.MeshStandardMaterial({
+		color: 'royalblue',
+		transparent: true,
+		opacity: 0.5,
+	})
+);
+presentSpotMesh.position.set(39, 0.005, 39);
+presentSpotMesh.rotation.x = -Math.PI/2;
+presentSpotMesh.receiveShadow = true;
+
+
+
+
+const gltfLoader = new GLTFLoader();
 
 // 하우스
 const house = new House({
@@ -162,13 +177,35 @@ const house = new House({
 
 // ppt화면
 const pptTexture1 = new THREE.TextureLoader().load('./images/ppt1.png')
+const pptTexture2 = new THREE.TextureLoader().load('./images/ppt2.png')
+const pptTexture3 = new THREE.TextureLoader().load('./images/ppt3.png')
+
 const planeGeometry = new THREE.PlaneGeometry(9.6, 5.4)
-const material = new THREE.MeshStandardMaterial({
+
+const pptMaterial1 = new THREE.MeshBasicMaterial({
 	map: pptTexture1,
 });
-const ppt1 = new THREE.Mesh(planeGeometry, material);
-ppt1.position.set(35, 13, 47)
-scene.add(ppt1);
+const pptMaterial2 = new THREE.MeshBasicMaterial({
+	map: pptTexture2,
+});
+const pptMaterial3 = new THREE.MeshBasicMaterial({
+	map: pptTexture3,
+});
+
+const ppt1 = new THREE.Mesh(planeGeometry, pptMaterial1);
+const ppt2 = new THREE.Mesh(planeGeometry, pptMaterial2);
+const ppt3 = new THREE.Mesh(planeGeometry, pptMaterial3);
+
+ppt1.position.set(32, 5, 35)
+ppt2.position.set(32, 5, 35)
+ppt3.position.set(32, 5, 35)
+
+scene.add(ppt1, ppt2, ppt3);
+
+ppt1.visible = false
+ppt2.visible = false
+ppt3.visible = false
+
 
 // 감자 표정 말풍선
 // const emotionTexture1 = new THREE.TextureLoader().load('./images/gamza_emotion.png')
@@ -178,34 +215,50 @@ scene.add(ppt1);
 // 	transparent: true, // PNG 투명도 활성화
 //     alphaTest: 0.5 // 투명도 기준치 설정 (0.5는 중간값, 필요에 따라 조정 가능)
 // });
-// const emotion1 = new THREE.Mesh(emotionPlaneGeometry, emotionMaterial);
-// emotion1.position.y = 7
-// scene.add(emotion1);
+// const	triangle = new THREE.Mesh(emotionPlaneGeometry, emotionMaterial);
+//	triangle.position.y = 7
+// scene.add	triangle);
 
-const loader = new THREE.TextureLoader();
-let emotion1;
-loader.load('./images/gamza_emotion.png', (texture) => {
-    texture.colorSpace = THREE.SRGBColorSpace; // sRGB 색 공간 설정
-    texture.needsUpdate = true;
 
-    const emotionPlaneGeometry = new THREE.PlaneGeometry(3, 3);
-    const emotionMaterial = new THREE.MeshBasicMaterial({
-        map: texture,
-        transparent: true, // PNG의 투명도 반영
-        alphaTest: 0.5 // 알파 값 기준
-    });
 
-    emotion1 = new THREE.Mesh(emotionPlaneGeometry, emotionMaterial);
-    emotion1.position.y = 7; // 위치 설정
-    scene.add(emotion1);
+// 감자 머리 위 삼각형
+const triangleTexture = new THREE.TextureLoader().load('./images/triangle2.png')
+const trianglePlaneGeometry = new THREE.PlaneGeometry(1, 1);
+const triangleMaterial = new THREE.MeshBasicMaterial({
+	map: triangleTexture,
+	transparent: true, // PNG의 투명도 반영
+	alphaTest: 0.5 // 알파 값 기준
 });
+triangleTexture.colorSpace = THREE.SRGBColorSpace; // sRGB 색 공간 설정
+triangleTexture.needsUpdate = true;
+const triangle = new THREE.Mesh(trianglePlaneGeometry, triangleMaterial);
+triangle.position.y = 2
+scene.add(triangle);
 
 
-	// // 지오메트리 합치기
-	// const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries([boxGeometry, sphereGeometry]);
-	// // 메쉬 생성
-	// const mesh = new THREE.Mesh(mergedGeometry, material);
-	// scene.add(mesh);
+// 화살표
+const arrowTexture = new THREE.TextureLoader().load('./images/arrow.png')
+const arrowPlaneGeometry = new THREE.PlaneGeometry(3, 3);
+const arrowMaterial = new THREE.MeshBasicMaterial({
+	map: arrowTexture,
+	transparent: true, // PNG의 투명도 반영
+	alphaTest: 0.5 // 알파 값 기준
+});
+arrowTexture.colorSpace = THREE.SRGBColorSpace; // sRGB 색 공간 설정
+arrowTexture.needsUpdate = true;
+const arrow = new THREE.Mesh(arrowPlaneGeometry, arrowMaterial);
+arrow.position.x = 39
+arrow.position.z = 39
+arrow.position.y = 2
+arrow.visible = false;
+scene.add(arrow);
+
+
+					// // 지오메트리 합치기
+					// const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries([boxGeometry, sphereGeometry]);
+					// // 메쉬 생성
+					// const mesh = new THREE.Mesh(mergedGeometry, material);
+					// scene.add(mesh);
 
 // 책걸상
 const tables = []
@@ -275,15 +328,20 @@ const clock = new THREE.Clock();
 
 function draw() {
 	const delta = clock.getDelta();
+	const elapsedTime = clock.getElapsedTime(); // 전체 경과 시간
 
 	if (player.mixer) player.mixer.update(delta);
 
 	if (player.modelMesh) {
 		camera.lookAt(player.modelMesh.position);
-
 	}
 
 	if (player.modelMesh) {
+
+		if (triangle) {
+			// Y 좌표를 부드럽게 오르락내리락
+			triangle.position.y = 5.5 + Math.sin(elapsedTime * 3) * 0.4; // 3.5 ~ 4.5 범위에서 움직임
+		}
 
 		if (isPressed) {
 			raycasting();    // 마우스를 누르는 동안 계속 래이캐스팅
@@ -301,9 +359,12 @@ function draw() {
 			// 구한 각도를 이용해 좌표를 구하고 그 좌표로 이동
 			player.modelMesh.position.x += Math.cos(angle) * 0.2;  // 걷는 속도
 			player.modelMesh.position.z += Math.sin(angle) * 0.2;
-
-			emotion1.position.x += Math.cos(angle) * 0.2; 
-			emotion1.position.z += Math.sin(angle) * 0.2; 
+			
+			// 머리 위 삼각형도 따라가기
+			if (triangle) {
+				triangle.position.x = player.modelMesh.position.x;
+				triangle.position.z = player.modelMesh.position.z;
+			}
 
 			// 카메라도 같이 이동
 			camera.position.x = cameraPosition.x + player.modelMesh.position.x;
@@ -319,8 +380,9 @@ function draw() {
 				Math.abs(destinationPoint.z - player.modelMesh.position.z) < 0.1
 			) {   // 멈춤 상태
 				player.moving = false;
-				console.log('멈춤');
+				// console.log('멈춤');
 			}
+			
 
 
 			// 하우스 인터랙션
@@ -371,87 +433,129 @@ function draw() {
 				);
 			}
 
+
+
 			// 테이블 인터랙션
 			if (   // 파란색 포인트 지점(3*3사각형) 안에 도달시 
 			Math.abs(tableSpotMesh.position.x - player.modelMesh.position.x) < 1.5 &&
 			Math.abs(tableSpotMesh.position.z - player.modelMesh.position.z) < 1.5
-		) {    // house.visible = false 가 아닐 시
-			if (!table1.visible) {
-				// console.log('나타나');
-				table1.visible = true;
-				tableSpotMesh.material.color.set('seagreen');
-				// house 매쉬 튀어 나옴
-				gsap.to(
-					table1.modelMesh.scale,
-					{
-						duration: 1,
-						x: 3,
-						y: 4,
-						z: 3,
-						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
-					}
-				);
-				gsap.to(
-					table2.modelMesh.scale,
-					{
-						duration: 1.2,
-						x: 3,
-						y: 4,
-						z: 3,
-						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
-					}
-				);
-				gsap.to(
-					table3.modelMesh.scale,
-					{
-						duration: 1.3,
-						x: 3,
-						y: 4,
-						z: 3,
-						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
-					}
-				);
-				gsap.to(
-					table4.modelMesh.scale,
-					{
-						duration: 1.4,
-						x: 3,
-						y: 4,
-						z: 3,
-						ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
-					}
-				);
-				// 카메라 각도 변환
-				gsap.to(
-					camera.position,
-					{
-						duration: 1,
-						y: 3
-					}
-				);
+			) {    // table1.visible = false 가 아닐 시
+				if (!table1.visible) {
+					// console.log('나타나');
+					table1.visible = true;
+					ppt1.visible = true;
+					ppt2.visible = false;
+					ppt3.visible = false;
+					arrow.visible = true;
+				
+					tableSpotMesh.material.color.set('seagreen');
+					scene.add(presentSpotMesh);
+
+					// table 매쉬 튀어 나옴
+					gsap.to(
+						table1.modelMesh.scale,
+						{
+							duration: 1,
+							x: 3,
+							y: 4,
+							z: 3,
+							ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+						}
+					);
+					gsap.to(
+						table2.modelMesh.scale,
+						{
+							duration: 1.2,
+							x: 3,
+							y: 4,
+							z: 3,
+							ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+						}
+					);
+					gsap.to(
+						table3.modelMesh.scale,
+						{
+							duration: 1.3,
+							x: 3,
+							y: 4,
+							z: 3,
+							ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+						}
+					);
+					gsap.to(
+						table4.modelMesh.scale,
+						{
+							duration: 1.4,
+							x: 3,
+							y: 4,
+							z: 3,
+							ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+						}
+					);
+					gsap.to(
+						ppt1,
+						{
+							duration: 1.4,
+							ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+						}
+					);
+
+					// 카메라 각도 변환
+					gsap.to(
+						camera.position,
+						{
+							duration: 1,
+							y: 3
+						}
+					);
+	
 			}
 		} else if (table1.visible) {
 			// table1.visible = false;
 			tableSpotMesh.material.color.set('skyblue');
 			
-			gsap.to(
-				camera.position,
-				{
-					duration: 1,
-					y: 6
-				}
-			);
+			// 발표 인터랙션
+			if (   // 파란색 포인트 지점(3*3사각형) 안에 도달시 
+			Math.abs(presentSpotMesh.position.x - player.modelMesh.position.x) < 1 &&
+			Math.abs(presentSpotMesh.position.z - player.modelMesh.position.z) < 1
+			) { 
+				presentSpotMesh.material.color.set('seagreen');
+				arrow.visible = false;
+				player.moving = false;
+				triangle.visible = false;
+				// player 사라짐
+				gsap.to(
+					player.modelMesh.scale,
+					{
+						duration: 0.6,
+						x: 0,
+						y: 0,
+						z: 0,
+						ease: 'expo.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
+					}
+				);
+
+				// 마우스 이벤트 비활성화
+				disableMouseEvents();
+
+			}
+			// gsap.to(
+			// 	camera.position,
+			// 	{
+			// 		duration: 1,
+			// 		y: 6
+			// 	}
+			// );
 		}
 
-
-
-		
 		} else {
 			player.moving = false;
 			// 서 있는 상태
 			player.actions[1].stop(); // 걸어가는 상태 멈춤
 			// player.actions[0].play();
 		}
+		
+
 	}
 	renderer.render(scene, camera);
 	renderer.setAnimationLoop(draw);
@@ -505,32 +609,65 @@ function raycasting() {
 	checkIntersects();
 }
 
-// 마우스 이벤트
-canvas.addEventListener('mousedown', e => {
-	isPressed = true;			 // 마우스 눌렀을 때
-	calculateMousePosition(e);   // 마우스 눌렀을 때 calculateMousePosition함수(마우스 좌표) 호출 
-});
-canvas.addEventListener('mouseup', () => {
-	isPressed = false;			// 마우스 뗐을 때
-});
-canvas.addEventListener('mousemove', e => {
-	if (isPressed) {
-		calculateMousePosition(e);  // 드래그
-	}
-});
+// 마우스 이벤트 핸들러 정의
+function onMouseDown(e) {
+    isPressed = true;
+    calculateMousePosition(e);
+}
 
-// 터치 이벤트 -> 모바일 사용시
-canvas.addEventListener('touchstart', e => {
-	isPressed = true;
-	calculateMousePosition(e.touches[0]);    
-});
-canvas.addEventListener('touchend', () => {
-	isPressed = false;
-});
-canvas.addEventListener('touchmove', e => {
-	if (isPressed) {
-		calculateMousePosition(e.touches[0]);
-	}
-});
+function onMouseUp() {
+    isPressed = false;
+}
+
+function onMouseMove(e) {
+    if (isPressed) {
+        calculateMousePosition(e);
+    }
+}
+
+function onTouchStart(e) {
+    isPressed = true;
+    calculateMousePosition(e.touches[0]);
+}
+
+function onTouchEnd() {
+    isPressed = false;
+}
+
+function onTouchMove(e) {
+    if (isPressed) {
+        calculateMousePosition(e.touches[0]);
+    }
+}
+
+
+// 이벤트 등록
+canvas.addEventListener('mousedown', onMouseDown);
+canvas.addEventListener('mouseup', onMouseUp);
+canvas.addEventListener('mousemove', onMouseMove);
+canvas.addEventListener('touchstart', onTouchStart);
+canvas.addEventListener('touchend', onTouchEnd);
+canvas.addEventListener('touchmove', onTouchMove);
+
+
+// 마우스 이벤트 제거 함수
+function disableMouseEvents() {
+    canvas.removeEventListener('mousedown', onMouseDown);
+    canvas.removeEventListener('mouseup', onMouseUp);
+    canvas.removeEventListener('mousemove', onMouseMove);
+    canvas.removeEventListener('touchstart', onTouchStart);
+    canvas.removeEventListener('touchend', onTouchEnd);
+    canvas.removeEventListener('touchmove', onTouchMove);
+}
+
+// 마우스 이벤트 활성화 함수
+function enableMouseEvents() {
+    canvas.addEventListener('mousedown', onMouseDown);
+    canvas.addEventListener('mouseup', onMouseUp);
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('touchstart', onTouchStart);
+    canvas.addEventListener('touchend', onTouchEnd);
+    canvas.addEventListener('touchmove', onTouchMove);
+}
 
 draw();
