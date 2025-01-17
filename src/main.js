@@ -7,8 +7,8 @@ import { Table } from './Table';
 import gsap from 'gsap';
 import { GUI } from 'dat.gui'
 import { Classroom } from './Classroom';
-import { Test } from './Test';
 import { Classroomgamza } from './ClassroomGamza';
+import { Onion } from './Onion';
 
 // Texture - 바닥
 const textureLoader = new THREE.TextureLoader();
@@ -89,9 +89,10 @@ directionalLight.shadow.camera.far = 100;
 scene.add(directionalLight);
 
 
+// 강의실 전등
 const classroomLight = new THREE.PointLight('white', 10, 100, 1.3); 
+classroomLight.position.set(6, 7, 10)
 const lightHelper = new THREE.PointLightHelper(classroomLight);
-
 
 // 그림자 설정
 classroomLight.castShadow = true;
@@ -108,7 +109,7 @@ classroomLight.shadow.camera.far = 5;
 // const controls = new OrbitControls(camera, renderer.domElement);
 
 // Mesh
-const meshes = [];
+const meshes = [];    // 레이캐스팅을 위한 배열. meshes 안에 들어가야 상호작용됨. 
 const floorMesh = new THREE.Mesh(
 	new THREE.PlaneGeometry(1000, 1000),
 	new THREE.MeshStandardMaterial({
@@ -173,8 +174,8 @@ const presentSpotMesh = new THREE.Mesh(
 		transparent: true,
 		opacity: 0.5,
 	})
-);
-presentSpotMesh.position.set(39, 0.005, 39);
+); 
+presentSpotMesh.position.set(20, 0.005, 20);
 presentSpotMesh.rotation.x = -Math.PI/2;
 presentSpotMesh.receiveShadow = true;
 
@@ -232,22 +233,21 @@ scene.add(triangle);
 
 
 // 화살표
-const arrowTexture = new THREE.TextureLoader().load('./images/arrow.png')
-const arrowPlaneGeometry = new THREE.PlaneGeometry(3, 3);
-const arrowMaterial = new THREE.MeshBasicMaterial({
-	map: arrowTexture,
-	transparent: true, // PNG의 투명도 반영
-	alphaTest: 0.5 // 알파 값 기준
-});
-arrowTexture.colorSpace = THREE.SRGBColorSpace; // sRGB 색 공간 설정
-arrowTexture.needsUpdate = true;
-const arrow = new THREE.Mesh(arrowPlaneGeometry, arrowMaterial);
-arrow.position.x = 39
-arrow.position.z = 39
-arrow.position.y = 2
-arrow.visible = false;
-scene.add(arrow);
-
+// const arrowTexture = new THREE.TextureLoader().load('./images/arrow.png')
+// const arrowPlaneGeometry = new THREE.PlaneGeometry(3, 3);
+// const arrowMaterial = new THREE.MeshBasicMaterial({
+// 	map: arrowTexture,
+// 	transparent: true, // PNG의 투명도 반영
+// 	alphaTest: 0.5 // 알파 값 기준
+// });
+// arrowTexture.colorSpace = THREE.SRGBColorSpace; // sRGB 색 공간 설정
+// arrowTexture.needsUpdate = true;
+// const arrow = new THREE.Mesh(arrowPlaneGeometry, arrowMaterial);
+// arrow.position.x = 11
+// arrow.position.z = 7
+// arrow.position.y = 2
+// arrow.visible = false;
+// scene.add(arrow);
 
 
 
@@ -257,11 +257,11 @@ const classroom = new Classroom({
 	scene,
 	modelSrc: '/models/s4_classroom.glb',
 	x: 0,
-	// y: -10.3,
-	y: 5.05,
+	y: -10.3,
+	// y: 5.05,
 	z: 10,
 	rotationY: THREE.MathUtils.degToRad(90),
-	// scaleX: 1,
+	scaleX: 1.5,
 	// scaleY: 1,
 	// scaleX: 1.5
 });
@@ -271,45 +271,45 @@ const table1 = new Table({
 	gltfLoader,
 	scene,
 	modelSrc: '/models/table-chair-set.glb',
-	x: 30,
+	x: 4,
 	y: 1.5,
-	z: 50,
-	scaleX: 0,
-	scaleY: 0,
-	scaleZ: 0
+	z: 16,
+	// scaleX: 0.9,
+	// scaleY: 0.9,
+	// scaleZ: 0.9
 });
 const table2 = new Table({
 	gltfLoader,
 	scene,
 	modelSrc: '/models/table-chair-set.glb',
-	x: 36,
+	x: 11,
 	y: 1.5,
-	z: 50,
-	scaleX: 0,
-	scaleY: 0,
-	scaleZ: 0
+	z: 16,
+	// scaleX: 0.9,
+	// scaleY: 0.9,
+	// scaleZ: 0.9
 });
 const table3 = new Table({
 	gltfLoader,
 	scene,
 	modelSrc: '/models/table-chair-set.glb',
-	x: 30,
+	x: 4,
 	y: 1.5,
-	z: 60,
-	scaleX: 0,
-	scaleY: 0,
-	scaleZ: 0
+	z: 21,
+	// scaleX: 0.9,
+	// scaleY: 0.9,
+	// scaleZ: 0.9
 });
 const table4 = new Table({
 	gltfLoader,
 	scene,
 	modelSrc: '/models/table-chair-set.glb',
-	x: 36,
+	x: 11,
 	y: 1.5,
-	z: 60,
-	scaleX: 0,
-	scaleY: 0,
-	scaleZ: 0
+	z: 21,
+	// scaleX: 0.9,
+	// scaleY: 0.9,
+	// scaleZ: 0.9
 });
 
 
@@ -321,6 +321,20 @@ const player = new Player({
 	modelSrc: '/models/Gamza_Walk_lightO.glb',
 	rotationY: Math.PI/2,
 });
+
+
+// 양파교수
+const onion = new Onion({
+	scene,
+	meshes,
+	gltfLoader,
+	modelSrc: '/models/s4_onion.glb',
+	// rotationY: Math.PI/2,
+	x: 5,
+	y: 5,
+	z: 5
+});
+
 // 플레이어
 // const classroomgamza = new Classroomgamza({
 // 	scene,
@@ -422,20 +436,25 @@ function draw() {
 							y: 3
 						}
 					);
-				
-					scene.add(classroomLight);
-					classroomLight.position.set(6, 7, 10)
-					scene.add(lightHelper);
+					
+					setTimeout(()=>{
+						scene.add(classroomLight);
+						scene.add(lightHelper);
+					}, 1000)
 
-
-					// table1.visible = false 가 아닐 시
-					if (!table1.visible) {
-						// console.log('나타나');
-						table1.visible = true;
+					setTimeout(()=>{
 						ppt1.visible = true;
 						ppt2.visible = false;
 						ppt3.visible = false;
-						arrow.visible = true;
+					}, 1000)
+
+					setTimeout(()=>{
+						table1.visible = true;
+					}, 3000)
+
+						
+					
+						// arrow.visible = true;
 
 						scene.add(presentSpotMesh);
 
@@ -444,9 +463,9 @@ function draw() {
 							table1.modelMesh.scale,
 							{
 								duration: 1,
-								x: 3,
-								y: 4,
-								z: 3,
+								x: 2.5,
+								y: 3,
+								z: 2.5,
 								ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
 							}
 						);
@@ -454,9 +473,9 @@ function draw() {
 							table2.modelMesh.scale,
 							{
 								duration: 1.2,
-								x: 3,
-								y: 4,
-								z: 3,
+								x: 2.5,
+								y: 3,
+								z: 2.5,
 								ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
 							}
 						);
@@ -464,9 +483,9 @@ function draw() {
 							table3.modelMesh.scale,
 							{
 								duration: 1.3,
-								x: 3,
-								y: 4,
-								z: 3,
+								x: 2.5,
+								y: 3,
+								z: 2.5,
 								ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
 							}
 						);
@@ -474,9 +493,9 @@ function draw() {
 							table4.modelMesh.scale,
 							{
 								duration: 1.4,
-								x: 3,
-								y: 4,
-								z: 3,
+								x: 2.5,
+								y: 3,
+								z: 2.5,
 								ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
 							}
 						);
@@ -487,8 +506,7 @@ function draw() {
 								ease: 'Bounce.easeOut'   // 튀어나옴 효과. 라이브러리가 가지고 있는 값.
 							}
 						);
-				} else if (table1.visible) {
-					// table1.visible = false;
+		
 					tableSpotMesh.material.color.set('skyblue');
 					
 					// 발표 인터랙션
@@ -497,7 +515,7 @@ function draw() {
 					Math.abs(presentSpotMesh.position.z - player.modelMesh.position.z) < 1
 					) { 
 						presentSpotMesh.material.color.set('seagreen');
-						arrow.visible = false;
+						// arrow.visible = false;
 						player.moving = false;
 						triangle.visible = false;
 						// player 사라짐
@@ -517,9 +535,6 @@ function draw() {
 		
 					}
 				}
-
-			}
-
 			}
 	    } else {
 			player.moving = false;
